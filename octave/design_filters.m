@@ -1,6 +1,6 @@
 % Global parameters for filter
 fc = 440;  % cut frequency in Hz
-fs = 10000; % sample frequency in Hz
+fs = 44100; % sample frequency in Hz
 order = 6; % Order of the filter
 
 
@@ -25,19 +25,22 @@ phase = angle(H)*180/pi;
 
 figure;
 
-subplot(2,1,1);
+subplot(3,1,1);
 semilogx(log_freq, 20*log10(magntiude), 'LineWidth', 2);
 axis([1 fs/2 -100 10]);
 xlabel('F [Hz]');
 ylabel('|H(F)| [dB]');
 grid on;
 
-subplot(2,1,2);
+subplot(3,1,2);
 semilogx(log_freq, phase, 'LineWidth', 2);
 xlabel('F [Hz]');
 ylabel('\angle H(F) [°]');	
 grid on;
 
-
+subplot(3,1,3);
+zplane (b,a);
+title ("Zero pole form");
+grid on;
 
 
