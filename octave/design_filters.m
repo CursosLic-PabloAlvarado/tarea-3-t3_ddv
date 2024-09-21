@@ -6,42 +6,9 @@ fc_low = 220;  % cut frequency in Hz
 fc_high = 1000; % cut frequency in Hz
 fs = 48000; % sample frequency in Hz
 order = 6; % Order of the filter
-rp = 1;     % Ripple in the passband (for elliptic and Chebyshev I)
-rs = 40;    % Attenuation in the stopband (for elliptic and Chebyshev II)
+rp = 1;     % Ripple in the passband 
+rs = 40;    % Attenuation in the stopband 
 
-function plot_filter(filename,fs)
-    Data = load(filename, 'sos');
-    sos = Data.sos;
-    [b,a] = sos2tf(sos);
-    % Plot the frequency response
-    % logartimic sacle frequency
-    log_freq = logspace(log10(1), log10(fs/2), 1000);
-    omega = 2*pi*log_freq/fs;
-    H = polyval(b,exp(j*omega))./polyval(a,exp(j*omega));
-    magntiude = abs(H);
-    %convert to degrees
-    phase = angle(H)*180/pi;
-
-    figure;
-
-    subplot(2,1,1);
-    semilogx(log_freq, 20*log10(magntiude), 'LineWidth', 2);
-    axis([1 fs/2 -100 10]);
-    xlabel('F [Hz]');
-    ylabel('|H(F)| [dB]');
-    grid on;
-
-    subplot(2,1,2);
-    semilogx(log_freq, phase, 'LineWidth', 2);
-    xlabel('F [Hz]');
-    ylabel('\angle H(F) [°]');	
-    grid on;
-
-    figure;
-    zplane (b,a);
-    title ("Zero pole form");
-
-endfunction
 
 function save_filter(b, a, filename)
     sos = tf2sos(b,a);
@@ -111,12 +78,12 @@ save_filter(b, a, 'ellip_bandpass.mat');
 %plot_filter('ellip_bandpass.mat', fs);
 
 % Chebyshev Type I filter bandpass
-[b, a] = cheby1(order, rp, f);
+[b, a] = cheby1(order, 3, f);
 save_filter(b, a, 'cheby1_bandpass.mat');
 %plot_filter('cheby1_bandpass.mat', fs);
 
 % Chebyshev Type II filter  bandpass
-[b, a] = cheby2(order, rs, f);
+[b, a] = cheby2(order, 60, f);
 save_filter(b, a, 'cheby2_bandpass.mat');
 %plot_filter('cheby2_bandpass.mat', fs);
 
@@ -135,14 +102,14 @@ save_filter(b, a, 'ellip_bandstop.mat');
 %plot_filter('ellip_bandstop.mat', fs);
 
 % Chebyshev Type I filter bandstop
-[b, a] = cheby1(order, rp, f, type_filter);
+[b, a] = cheby1(order, 2, f, type_filter);
 save_filter(b, a, 'cheby1_bandstop.mat');
 %plot_filter('cheby1_bandstop.mat', fs);
 
 % Chebyshev Type II filter  bandstop
-[b, a] = cheby2(order, rs, f, type_filter);
+[b, a] = cheby2(order, 60, f, type_filter);
 save_filter(b, a, 'cheby2_bandstop.mat');
-%plot_filter('cheby2_bandstop.mat', fs);
+plot_filter('cheby2_bandstop.mat', fs);
 
 
 
