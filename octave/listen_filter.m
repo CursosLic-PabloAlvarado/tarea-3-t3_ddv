@@ -1,4 +1,4 @@
-function listen_filter(filter_file, wav_file, fs=44100)
+function listen_filter(filter_file, wav_file, fs=48000)
 
     Data = load(filter_file, 'sos');
     sos = Data.sos;
