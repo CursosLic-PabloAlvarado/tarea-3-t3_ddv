@@ -5,7 +5,7 @@ fc_highpass = 600; % cut frequency in Hz
 fc_low = 220;  % cut frequency in Hz
 fc_high = 1000; % cut frequency in Hz
 fs = 48000; % sample frequency in Hz
-order = 6; % Order of the filter
+order = 2; % Order of the filter
 rp = 1;     % Ripple in the passband 
 rs = 40;    % Attenuation in the stopband 
 
@@ -78,12 +78,12 @@ save_filter(b, a, 'ellip_bandpass.mat');
 %plot_filter('ellip_bandpass.mat', fs);
 
 % Chebyshev Type I filter bandpass
-[b, a] = cheby1(order, 3, f);
+[b, a] = cheby1(order, rp, f);
 save_filter(b, a, 'cheby1_bandpass.mat');
 %plot_filter('cheby1_bandpass.mat', fs);
 
 % Chebyshev Type II filter  bandpass
-[b, a] = cheby2(order, 50, f);
+[b, a] = cheby2(order, rs, f);
 save_filter(b, a, 'cheby2_bandpass.mat');
 plot_filter('cheby2_bandpass.mat', fs);
 
@@ -102,12 +102,12 @@ save_filter(b, a, 'ellip_bandstop.mat');
 %plot_filter('ellip_bandstop.mat', fs);
 
 % Chebyshev Type I filter bandstop
-[b, a] = cheby1(order, 2, f, type_filter);
+[b, a] = cheby1(order, rp, f, type_filter);
 save_filter(b, a, 'cheby1_bandstop.mat');
 %plot_filter('cheby1_bandstop.mat', fs);
 
 % Chebyshev Type II filter  bandstop
-[b, a] = cheby2(order, 50, f, type_filter);
+[b, a] = cheby2(order, rs, f, type_filter);
 save_filter(b, a, 'cheby2_bandstop.mat');
 plot_filter('cheby2_bandstop.mat', fs);
 
