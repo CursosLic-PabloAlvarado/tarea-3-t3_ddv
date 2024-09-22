@@ -1,16 +1,23 @@
 pkg load signal
 function plot_filter(filename,fs=48000)
+    % Load the filter
     Data = load(filename, 'sos');
     sos = Data.sos;
     [b,a] = sos2tf(sos);
-    % Plot the frequency response
+
     % logartimic sacle frequency
-    log_freq = logspace(log10(1), log10(fs/2), 1000);
+    log_freq = logspace(1, log10(fs/2), 1000);
     omega = 2*pi*log_freq/fs;
-    H = polyval(b,exp(j*omega))./polyval(a,exp(j*omega));
+
+    % frequency response
+    H = polyval(b,exp(1j*omega))./polyval(a,exp(1j*omega));
+
+    % magnitude and phase
     magntiude = abs(H);
+
     %convert to degrees
     phase = angle(H)*180/pi;
+    phase = mod(phase+180, 360) - 360;
 
     figure;
 
@@ -27,8 +34,8 @@ function plot_filter(filename,fs=48000)
     ylabel('\angle H(F) [°]');	
     grid on;
 
-    figure;
-    zplane (b,a);
-    title ("Zero pole form");
+    %figure;
+    %zplane (b,a);
+    %title ("Zero pole form");
 
 endfunction

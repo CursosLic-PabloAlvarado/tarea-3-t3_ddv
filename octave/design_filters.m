@@ -83,9 +83,9 @@ save_filter(b, a, 'cheby1_bandpass.mat');
 %plot_filter('cheby1_bandpass.mat', fs);
 
 % Chebyshev Type II filter  bandpass
-[b, a] = cheby2(order, 60, f);
+[b, a] = cheby2(order, 50, f);
 save_filter(b, a, 'cheby2_bandpass.mat');
-%plot_filter('cheby2_bandpass.mat', fs);
+plot_filter('cheby2_bandpass.mat', fs);
 
 % ------- Bandstop filters -------
 type_filter = "stop";
@@ -107,7 +107,7 @@ save_filter(b, a, 'cheby1_bandstop.mat');
 %plot_filter('cheby1_bandstop.mat', fs);
 
 % Chebyshev Type II filter  bandstop
-[b, a] = cheby2(order, 60, f, type_filter);
+[b, a] = cheby2(order, 50, f, type_filter);
 save_filter(b, a, 'cheby2_bandstop.mat');
 plot_filter('cheby2_bandstop.mat', fs);
 
