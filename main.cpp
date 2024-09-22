@@ -53,9 +53,9 @@
 #include <boost/program_options.hpp>
 
 #include "waitkey.h"
-#include "passthrough_client.h"
 
 #include "parse_filter.h"
+#include "filter_client.h"
 
 namespace po=boost::program_options;
 
@@ -77,7 +77,7 @@ int main (int argc, char *argv[])
 
   
   try {
-    static passthrough_client client;
+    static filter_client *client = new filter_client();
 
     typedef jack::client::sample_t sample_t;
     
@@ -111,7 +111,7 @@ int main (int argc, char *argv[])
         audio_files = vm["files"].as< std::vector<std::filesystem::path> >();
     
       for (const auto& f : audio_files) {
-        bool ok =client.add_file(f);
+        bool ok =client->add_file(f);
         std::cout << "Adding file '" << f.c_str() << "' "
                   << (ok ? "succedded" : "failed") << std::endl;
       }
@@ -120,10 +120,10 @@ int main (int argc, char *argv[])
     if (vm.count("coeffs")) {
       filter_coefs = parse_filter<sample_t>(filter_file);
       std::cout << filter_coefs.size() << " 2nd order filter read from "
-                << filter_file;
+                << filter_file<<std::endl;
     }
     
-    if (client.init() != jack::client_state::Running) {
+    if (client->init() != jack::client_state::Running) {
       throw std::runtime_error("Could not initialize the JACK client");
     }
 
@@ -148,7 +148,7 @@ int main (int argc, char *argv[])
               vm["files"].as< std::vector<std::filesystem::path> >();
             
             for (const auto& f : audio_files) {
-              bool ok =client.add_file(f);
+              bool ok =client->add_file(f);
               std::cout << "  Re-adding file '" << f.c_str() << "' "
                         << (ok ? "succedded" : "failed") << std::endl;
             }
@@ -156,6 +156,10 @@ int main (int argc, char *argv[])
           
           std::cout << "Repeat playing files" << std::endl;
         } break;
+        case 't':{
+          client->set_coeffients(filter_coefs[0]);
+          client->active_biquad_filter();
+        }break;
         default: {
           if (key>32) {
             std::cout << "Key " << char(key) << " pressed" << std::endl;
@@ -168,7 +172,7 @@ int main (int argc, char *argv[])
       } // if (key>0)
     } // end while
 
-    client.stop();
+    client->stop();
   }
   catch (std::exception& exc) {
     std::cout << argv[0] << ": Error: " << exc.what() << std::endl;
