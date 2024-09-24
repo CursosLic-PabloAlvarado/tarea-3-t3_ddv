@@ -5,7 +5,7 @@ fc_highpass = 600; % cut frequency in Hz
 fc_low = 220;  % cut frequency in Hz
 fc_high = 1000; % cut frequency in Hz
 fs = 48000; % sample frequency in Hz
-order = 2; % Order of the filter
+order = 3; % Order of the filter
 rp = 1;     % Ripple in the passband 
 rs = 40;    % Attenuation in the stopband 
 
@@ -22,7 +22,7 @@ f = 2 * fc_lowpass/fs; % Normalized frequency
 % Butterworth filter lowpass
 [b,a] = butter(order,f,type_filter);
 save_filter(b,a, "butter_lowpass.mat");
-%plot_filter("butter_lowpass.mat",fs);
+plot_filter("butter_lowpass.mat",fs);
 
 % Elliptic filter lowpass
 [b, a] = ellip(order, rp, rs, f, type_filter);
@@ -85,7 +85,7 @@ save_filter(b, a, 'cheby1_bandpass.mat');
 % Chebyshev Type II filter  bandpass
 [b, a] = cheby2(order, rs, f);
 save_filter(b, a, 'cheby2_bandpass.mat');
-plot_filter('cheby2_bandpass.mat', fs);
+%plot_filter('cheby2_bandpass.mat', fs);
 
 % ------- Bandstop filters -------
 type_filter = "stop";
@@ -109,7 +109,7 @@ save_filter(b, a, 'cheby1_bandstop.mat');
 % Chebyshev Type II filter  bandstop
 [b, a] = cheby2(order, rs, f, type_filter);
 save_filter(b, a, 'cheby2_bandstop.mat');
-plot_filter('cheby2_bandstop.mat', fs);
+%plot_filter('cheby2_bandstop.mat', fs);
 
 
 

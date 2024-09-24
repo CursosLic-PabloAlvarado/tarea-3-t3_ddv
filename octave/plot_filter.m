@@ -6,18 +6,18 @@ function plot_filter(filename,fs=48000)
     [b,a] = sos2tf(sos);
 
     % logartimic sacle frequency
-    log_freq = logspace(1, log10(fs/2), 1000);
+    log_freq = logspace(0, log10(fs/2), 1000);
     omega = 2*pi*log_freq/fs;
 
     % frequency response
-    H = polyval(b,exp(1j*omega))./polyval(a,exp(1j*omega));
+    H = polyval(b,exp(j*omega))./polyval(a,exp(j*omega));
 
     % magnitude and phase
     magntiude = abs(H);
 
     %convert to degrees
     phase = angle(H)*180/pi;
-    phase = mod(phase+180, 360) - 360;
+    %phase = mod(phase+180, 360) - 360;
 
     figure;
 
@@ -30,6 +30,7 @@ function plot_filter(filename,fs=48000)
 
     subplot(2,1,2);
     semilogx(log_freq, phase, 'LineWidth', 2);
+    %axis([1 fs/2 -360 0]);
     xlabel('F [Hz]');
     ylabel('\angle H(F) [°]');	
     grid on;
