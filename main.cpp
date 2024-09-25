@@ -163,7 +163,7 @@ int main (int argc, char *argv[])
         case 't':{
           client->inactive_passall_filter();
           volume->deactivate_volume();
-          client->set_coeffients(filter_coefs[0]);
+          client->set_coeffients(filter_coefs);
           client->active_biquad_filter();
         }break;
         case 'v':{

@@ -39,11 +39,6 @@
 
 
 filter_client::filter_client(volume_controller* volume) : jack::client() {
-    this->b0 = 0;
-    this->b1 = 0;
-    this->b2 = 0;
-    this->a1 = 0;
-    this->a2 = 0;
     this->is_biquad_filter_active = false;
     this->is_passall_filter_active = true;
     this->biquad_client = new biquad(volume);
@@ -81,13 +76,8 @@ bool filter_client::process(jack_nframes_t nframes,
   return true;
 }
 
-void filter_client::set_coeffients(const std::vector<sample_t> coeffients){
-    this->b0 = coeffients[0];
-    this->b1 = coeffients[1];
-    this->b2 = coeffients[2];
-    this->a1 = coeffients[4];
-    this->a2 = coeffients[5];
-    biquad_client->set_coeffients(coeffients);
+void filter_client::set_coeffients(const std::vector<std::vector<sample_t>> coeffients){
+    biquad_client->set_coeffients(coeffients[0]);
 }
 
 void filter_client::active_biquad_filter(){

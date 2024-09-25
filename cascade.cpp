@@ -1,5 +1,5 @@
 /**
- * filter_client.h
+ * cascade.cpp
  *
  * Copyright (C) 2023-2024  Pablo Alvarado
  * EL5805 Procesamiento Digital de Señales
@@ -35,59 +35,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _FILTER_CLIENT_H
-#define _FILTER_CLIENT_H
+#include "cascade.h"
 
-#include <iostream>
 #include <cstring>
-#include <vector>
-#include "jack_client.h"
-#include "biquad.h"
-#include "volume_controller.h"
 
+cascade::cascade(volume_controller* volume_controller) : jack::client() {
+    this->volume_controller_prt = volume_controller;
+}
+
+
+cascade::~cascade() {
+}
+  
 /**
- * Jack client class
+ * The process callback for this JACK application is called in a
+ * special realtime thread once for each audio cycle.
  *
- * This class wraps some basic jack functionality.
- */
-class filter_client : public jack::client {
-private:
-  bool is_biquad_filter_active;
-  bool is_passall_filter_active;
-  biquad *biquad_client;
-
-  /**
-   * Pointer to the volume controller.
-   * This member points to an instance of the volume_controller class that 
-   * manages volume operations.
-  */
-    volume_controller* volume_controller_prt;
-  
-
-public:
-  // typedef jack::client::sample_t sample_t;
-  
-  /**
-   * The default constructor performs some basic connections.
+ * This client does nothing more than copy data from its input
+ * port to its output port. It will exit when stopped by 
+   * the user (e.g. using Ctrl-C on a unix-ish operating system)
    */
-  filter_client(volume_controller* volume);
-  ~filter_client();
+bool cascade::process(jack_nframes_t nframes,
+                                 const sample_t *const in,
+                                 sample_t *const out) {
+    
+    // Llamar a biquad clients
+    memcpy (out, in, sizeof(sample_t)*nframes);
 
-  /**
-   * Passthrough functionality
-   */
-  virtual bool process(jack_nframes_t nframes,
-                       const sample_t *const in,
-                       sample_t *const out) override;
+    return true;
+}
 
-  void set_coeffients(const std::vector<std::vector<sample_t>> coeffients);
-  void active_biquad_filter();
-  void active_passall_filter();
-  void inactive_biquad_filter();
-  void inactive_passall_filter();
+void cascade::set_coeffients(const std::vector<std::vector<sample_t>> coeffients){
+    // set coeffients for biquad clients
+    //example:
+    //biquad_client->set_coeffients(coeffients[0]);
 
-
-};
-
-
-#endif
+}
