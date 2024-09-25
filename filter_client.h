@@ -43,6 +43,7 @@
 #include <vector>
 #include "jack_client.h"
 #include "biquad.h"
+#include "volume_controller.h"
 
 /**
  * Jack client class
@@ -54,6 +55,13 @@ private:
   bool is_biquad_filter_active;
   double a1,a2,b0,b1,b2;
   biquad *biquad_client;
+
+  /**
+   * Pointer to the volume controller.
+   * This member points to an instance of the volume_controller class that 
+   * manages volume operations.
+  */
+    volume_controller* volume_controller_prt;
   
 
 public:
@@ -62,7 +70,7 @@ public:
   /**
    * The default constructor performs some basic connections.
    */
-  filter_client();
+  filter_client(volume_controller* volume);
   ~filter_client();
 
   /**

@@ -42,6 +42,8 @@
 #include <cstring>
 #include <vector>
 #include "jack_client.h"
+#include "volume_controller.h"
+
 
 /**
  * Jack client class
@@ -53,6 +55,14 @@ class biquad : public jack::client {
 private:
     double a1,a2,b0,b1,b2;
     double x1,x2,y1,y2;
+
+  /**
+   * Pointer to the volume controller.
+   * This member points to an instance of the volume_controller class that 
+   * manages volume operations.
+  */
+    volume_controller* volume_controller_prt;
+  
     
 public:
     // typedef jack::client::sample_t sample_t;
@@ -60,7 +70,7 @@ public:
     /**
      * The default constructor performs some basic connections.
      */
-    biquad();
+    biquad(volume_controller* volume_ptr);
     ~biquad();
 
     /**

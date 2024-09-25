@@ -38,14 +38,15 @@
 #include "filter_client.h"
 
 
-filter_client::filter_client() : jack::client() {
+filter_client::filter_client(volume_controller* volume) : jack::client() {
     this->b0 = 0;
     this->b1 = 0;
     this->b2 = 0;
     this->a1 = 0;
     this->a2 = 0;
     this->is_biquad_filter_active = false;
-    this->biquad_client = new biquad();
+    this->biquad_client = new biquad(volume);
+    this->volume_controller_prt = volume;
 }
 
 filter_client::~filter_client() {
@@ -65,7 +66,16 @@ bool filter_client::process(jack_nframes_t nframes,
   if (this->is_biquad_filter_active == true){
     biquad_client->process(nframes, in, out);
   }else{  
-    memcpy (out, in, sizeof(sample_t)*nframes);
+    double volume_intensity = this->volume_controller_prt->get_volume_intesity();
+    const sample_t *const end_ptr = in + nframes;
+    const sample_t *in_ptr = in;
+    sample_t *out_ptr = out;
+
+    for (;in_ptr != end_ptr;){
+        *out_ptr = volume_intensity * (*in_ptr);
+        in_ptr++;
+        out_ptr++;
+    }
   }
   return true;
 }

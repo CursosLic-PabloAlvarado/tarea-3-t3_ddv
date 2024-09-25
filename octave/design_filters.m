@@ -1,4 +1,6 @@
 pkg load signal
+plot_filter
+listen_filter
 % Global parameters for filter
 fc_lowpass = 440;  % cut frequency in Hz
 fc_highpass = 600; % cut frequency in Hz

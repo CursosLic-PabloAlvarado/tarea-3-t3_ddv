@@ -39,7 +39,7 @@
 
 #include <cstring>
 
-biquad::biquad() : jack::client() {
+biquad::biquad(volume_controller* volume_controller) : jack::client() {
     this->b0 = 0;
     this->b1 = 0;
     this->b2 = 0;
@@ -49,6 +49,7 @@ biquad::biquad() : jack::client() {
     this->x2 = 0;
     this->y1 = 0;
     this->y2 = 0;
+    this->volume_controller_prt = volume_controller;
 }
 
 
@@ -66,13 +67,14 @@ biquad::~biquad() {
 bool biquad::process(jack_nframes_t nframes,
                                  const sample_t *const in,
                                  sample_t *const out) {
-
+    
+    double volume_intensity = this->volume_controller_prt->get_volume_intesity();
     const sample_t *const end_ptr = in + nframes;
     const sample_t *in_ptr = in;
     sample_t *out_ptr = out;
 
     for (;in_ptr != end_ptr;){
-        *out_ptr = this->b0 * (*in_ptr)  +  this->b1 * x1 + this->b2 * x2 - this->a1 * y1 - this->a2 * y2;
+        *out_ptr = volume_intensity * (this->b0 * (*in_ptr)  +  this->b1 * x1 + this->b2 * x2 - this->a1 * y1 - this->a2 * y2);
       
         // update states
         this->x2 = this->x1;
