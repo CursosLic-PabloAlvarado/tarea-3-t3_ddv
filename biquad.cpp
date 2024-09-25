@@ -68,7 +68,7 @@ bool biquad::process(jack_nframes_t nframes,
                                  const sample_t *const in,
                                  sample_t *const out) {
     
-    double volume_intensity = this->volume_controller_prt->get_volume_intesity();
+    float volume_intensity = this->volume_controller_prt->get_volume_intesity();
     const sample_t *const end_ptr = in + nframes;
     const sample_t *in_ptr = in;
     sample_t *out_ptr = out;
@@ -83,8 +83,8 @@ bool biquad::process(jack_nframes_t nframes,
         this->y1 = *out_ptr;
 
         // update pointers
-        in_ptr++;
-        out_ptr++;
+        ++in_ptr;
+        ++out_ptr;
     }
     
   return true;

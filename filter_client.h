@@ -53,6 +53,7 @@
 class filter_client : public jack::client {
 private:
   bool is_biquad_filter_active;
+  bool is_passall_filter_active;
   double a1,a2,b0,b1,b2;
   biquad *biquad_client;
 
@@ -82,6 +83,10 @@ public:
 
   void set_coeffients(const std::vector<sample_t> coeffients);
   void active_biquad_filter();
+  void active_passall_filter();
+  void inactive_biquad_filter();
+  void inactive_passall_filter();
+
 
 };
 

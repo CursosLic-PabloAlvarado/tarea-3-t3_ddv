@@ -45,6 +45,7 @@ filter_client::filter_client(volume_controller* volume) : jack::client() {
     this->a1 = 0;
     this->a2 = 0;
     this->is_biquad_filter_active = false;
+    this->is_passall_filter_active = true;
     this->biquad_client = new biquad(volume);
     this->volume_controller_prt = volume;
 }
@@ -65,8 +66,8 @@ bool filter_client::process(jack_nframes_t nframes,
                                  sample_t *const out) {
   if (this->is_biquad_filter_active == true){
     biquad_client->process(nframes, in, out);
-  }else{  
-    double volume_intensity = this->volume_controller_prt->get_volume_intesity();
+  }else if (this->is_passall_filter_active == true ){  
+    float volume_intensity = this->volume_controller_prt->get_volume_intesity();
     const sample_t *const end_ptr = in + nframes;
     const sample_t *in_ptr = in;
     sample_t *out_ptr = out;
@@ -90,5 +91,21 @@ void filter_client::set_coeffients(const std::vector<sample_t> coeffients){
 }
 
 void filter_client::active_biquad_filter(){
+  std::cout<<"Active biquad"<<std::endl;
   this->is_biquad_filter_active = true;
+}
+
+void filter_client::active_passall_filter(){
+  std::cout<<"Active pass all"<<std::endl;
+  this->is_passall_filter_active = true;
+}
+
+void filter_client::inactive_biquad_filter(){
+  std::cout<<"Inactive biquad all"<<std::endl;
+  this->is_biquad_filter_active = false;
+}
+
+void filter_client::inactive_passall_filter(){
+  std::cout<<"Inactive pass all"<<std::endl;
+  this->is_passall_filter_active = false;
 }

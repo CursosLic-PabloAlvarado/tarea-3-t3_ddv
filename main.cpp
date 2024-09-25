@@ -81,6 +81,7 @@ int main (int argc, char *argv[])
   try {
     static volume_controller* volume = new volume_controller();
     static filter_client *client = new filter_client(volume);
+    
 
     typedef jack::client::sample_t sample_t;
     
@@ -160,6 +161,8 @@ int main (int argc, char *argv[])
           std::cout << "Repeat playing files" << std::endl;
         } break;
         case 't':{
+          client->inactive_passall_filter();
+          volume->deactivate_volume();
           client->set_coeffients(filter_coefs[0]);
           client->active_biquad_filter();
         }break;
@@ -175,6 +178,11 @@ int main (int argc, char *argv[])
           if (volume->is_volume_active()){
             volume->decrease_volume();
           }
+        }break;
+        case 'a':{
+          client->inactive_biquad_filter();
+          volume->deactivate_volume();
+          client->active_passall_filter();
         }break;
         default: {
           if (key>32) {
