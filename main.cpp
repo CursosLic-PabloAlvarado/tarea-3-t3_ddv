@@ -56,6 +56,8 @@
 
 #include "parse_filter.h"
 #include "filter_client.h"
+#include "volume_controller.h"
+
 
 namespace po=boost::program_options;
 
@@ -77,7 +79,9 @@ int main (int argc, char *argv[])
 
   
   try {
-    static filter_client *client = new filter_client();
+    static volume_controller* volume = new volume_controller();
+    static filter_client *client = new filter_client(volume);
+    
 
     typedef jack::client::sample_t sample_t;
     
@@ -157,8 +161,28 @@ int main (int argc, char *argv[])
           std::cout << "Repeat playing files" << std::endl;
         } break;
         case 't':{
-          client->set_coeffients(filter_coefs[0]);
+          client->inactive_passall_filter();
+          volume->deactivate_volume();
+          client->set_coeffients(filter_coefs);
           client->active_biquad_filter();
+        }break;
+        case 'v':{
+          volume->activate_volume();
+        }break;
+        case '+':{
+          if (volume->is_volume_active()){
+            volume->increase_volume();
+          }
+        }break;
+        case '-':{
+          if (volume->is_volume_active()){
+            volume->decrease_volume();
+          }
+        }break;
+        case 'a':{
+          client->inactive_biquad_filter();
+          volume->deactivate_volume();
+          client->active_passall_filter();
         }break;
         default: {
           if (key>32) {

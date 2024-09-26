@@ -43,6 +43,7 @@
 #include <vector>
 #include "jack_client.h"
 #include "biquad.h"
+#include "volume_controller.h"
 
 /**
  * Jack client class
@@ -52,8 +53,15 @@
 class filter_client : public jack::client {
 private:
   bool is_biquad_filter_active;
-  double a1,a2,b0,b1,b2;
+  bool is_passall_filter_active;
   biquad *biquad_client;
+
+  /**
+   * Pointer to the volume controller.
+   * This member points to an instance of the volume_controller class that 
+   * manages volume operations.
+  */
+    volume_controller* volume_controller_prt;
   
 
 public:
@@ -62,7 +70,7 @@ public:
   /**
    * The default constructor performs some basic connections.
    */
-  filter_client();
+  filter_client(volume_controller* volume);
   ~filter_client();
 
   /**
@@ -72,8 +80,12 @@ public:
                        const sample_t *const in,
                        sample_t *const out) override;
 
-  void set_coeffients(const std::vector<sample_t> coeffients);
+  void set_coeffients(const std::vector<std::vector<sample_t>> coeffients);
   void active_biquad_filter();
+  void active_passall_filter();
+  void inactive_biquad_filter();
+  void inactive_passall_filter();
+
 
 };
 

@@ -1,5 +1,5 @@
 /**
- * biquad.cpp
+ * cascade.h
  *
  * Copyright (C) 2023-2024  Pablo Alvarado
  * EL5805 Procesamiento Digital de Señales
@@ -35,68 +35,50 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "biquad.h"
+#ifndef _CASCADE_H
+#define _CASCADE_H
 
+#include <iostream>
 #include <cstring>
-
-biquad::biquad(volume_controller* volume_controller) : jack::client() {
-    this->b0 = 0;
-    this->b1 = 0;
-    this->b2 = 0;
-    this->a1 = 0;
-    this->a2 = 0;
-    this->x1 = 0;
-    this->x2 = 0;
-    this->y1 = 0;
-    this->y2 = 0;
-    this->volume_controller_prt = volume_controller;
-}
+#include <vector>
+#include "jack_client.h"
+#include "volume_controller.h"
 
 
-biquad::~biquad() {
-}
-  
 /**
- * The process callback for this JACK application is called in a
- * special realtime thread once for each audio cycle.
+ * Jack client class
  *
- * This client does nothing more than copy data from its input
- * port to its output port. It will exit when stopped by 
-   * the user (e.g. using Ctrl-C on a unix-ish operating system)
-   */
-bool biquad::process(jack_nframes_t nframes,
-                                 const sample_t *const in,
-                                 sample_t *const out) {
+ * This class wraps some basic jack functionality.
+ */
+class cascade : public jack::client {
+
+private:
+  /**
+   * Pointer to the volume controller.
+   * This member points to an instance of the volume_controller class that 
+   * manages volume operations.
+  */
+    volume_controller* volume_controller_prt;
+  
     
-    float volume_intensity = this->volume_controller_prt->get_volume_intesity();
-    const sample_t *const end_ptr = in + nframes;
-    const sample_t *in_ptr = in;
-    sample_t *out_ptr = out;
-    sample_t y0 = 0; 
+public:
+    // typedef jack::client::sample_t sample_t;
 
-    for (;in_ptr != end_ptr;){
-        y0 =  (this->b0 * (*in_ptr)  +  this->b1 * x1 + this->b2 * x2 - this->a1 * y1 - this->a2 * y2);
-      
-        // update states
-        this->x2 = this->x1;
-        this->x1 = *in_ptr;
-        this->y2 = this->y1;
-        this->y1 = y0;
+    /**
+     * The default constructor performs some basic connections.
+     */
+    cascade(volume_controller* volume_ptr);
+    ~cascade();
 
-        *out_ptr = volume_intensity * y0;
+    /**
+     * Passthrough functionality
+     */
+    virtual bool process(jack_nframes_t nframes,
+                        const sample_t *const in,
+                        sample_t *const out) override;
 
-        // update pointers
-        ++in_ptr;
-        ++out_ptr;
-    }
-    
-  return true;
-}
+    void set_coeffients(const std::vector<std::vector<sample_t>> coeffients);
+};
 
-void biquad::set_coeffients(const std::vector<sample_t> coeffients){
-    this->b0 = coeffients[0];
-    this->b1 = coeffients[1];
-    this->b2 = coeffients[2];
-    this->a1 = coeffients[4];
-    this->a2 = coeffients[5];
-}
+
+#endif
