@@ -41,6 +41,9 @@
 
 cascade::cascade(volume_controller* volume_controller) : jack::client() {
     this->volume_controller_prt = volume_controller;
+    this->biquad_client1 = new biquad(nullptr);
+    this->biquad_client2 = new biquad(volume_controller);
+    this->biquad_client3 = new biquad(volume_controller);
 }
 
 
@@ -60,7 +63,26 @@ bool cascade::process(jack_nframes_t nframes,
                                  sample_t *const out) {
     
     // Llamar a biquad clients
-    memcpy (out, in, sizeof(sample_t)*nframes);
+    // memcpy (out, in, sizeof(sample_t)*nframes);
+    sample_t *const out1 = new sample_t[nframes];
+    sample_t *const out2 = new sample_t[nframes];   
+    switch (this->num_biquads)
+    {
+    case 1:
+        biquad_client1->process(nframes, in, out);
+        break;
+    case 2:
+        biquad_client1->process(nframes, in, out1);
+        biquad_client2->process(nframes, out1, out);
+        break;
+    case 3:
+        biquad_client1->process(nframes, in, out1);
+        biquad_client2->process(nframes, out1, out2);
+        biquad_client3->process(nframes, out2, out);
+        break;
+    default:
+        break;
+    }
 
     return true;
 }
@@ -69,5 +91,27 @@ void cascade::set_coeffients(const std::vector<std::vector<sample_t>> coeffients
     // set coeffients for biquad clients
     //example:
     //biquad_client->set_coeffients(coeffients[0]);
+    this->num_biquads = coeffients.size();
+
+    switch (this->num_biquads)
+    {
+    case 1:
+        biquad_client1->set_coeffients(coeffients[0]);
+        biquad_client1->set_volume_controller(this->volume_controller_prt);
+        break;
+    case 2:
+        biquad_client1->set_coeffients(coeffients[0]);
+        biquad_client2->set_coeffients(coeffients[1]);
+        // biquad_client2->set_volume_controller(this->volume_controller_prt);
+        break;
+    case 3:
+        biquad_client1->set_coeffients(coeffients[0]);
+        biquad_client2->set_coeffients(coeffients[1]);
+        biquad_client3->set_coeffients(coeffients[2]);
+        biquad_client3->set_volume_controller(this->volume_controller_prt);
+        break;
+    default:
+        break;
+    }
 
 }

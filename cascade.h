@@ -43,6 +43,7 @@
 #include <vector>
 #include "jack_client.h"
 #include "volume_controller.h"
+#include "biquad.h"
 
 
 /**
@@ -59,10 +60,14 @@ private:
    * manages volume operations.
   */
     volume_controller* volume_controller_prt;
-  
+
+    biquad *biquad_client1;
+    biquad *biquad_client2;
+    biquad *biquad_client3;
+
+    int num_biquads;
     
 public:
-    // typedef jack::client::sample_t sample_t;
 
     /**
      * The default constructor performs some basic connections.
@@ -71,14 +76,13 @@ public:
     ~cascade();
 
     /**
-     * Passthrough functionality
+     * Cascadde functionality
      */
     virtual bool process(jack_nframes_t nframes,
                         const sample_t *const in,
                         sample_t *const out) override;
 
-    void set_coeffients(const std::vector<std::vector<sample_t>> coeffients);
+    void set_coeffients(const std::vector<std::vector<sample_t>> coefficients);
 };
-
 
 #endif

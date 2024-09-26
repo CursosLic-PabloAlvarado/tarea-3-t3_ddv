@@ -81,6 +81,7 @@ public:
                         sample_t *const out) override;
 
     void set_coeffients(const std::vector<sample_t> coeffients);
+    void set_volume_controller(volume_controller* volume_controller);
 };
 
 

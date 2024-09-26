@@ -43,6 +43,7 @@
 #include <vector>
 #include "jack_client.h"
 #include "biquad.h"
+#include "cascade.h"
 #include "volume_controller.h"
 
 /**
@@ -54,7 +55,9 @@ class filter_client : public jack::client {
 private:
   bool is_biquad_filter_active;
   bool is_passall_filter_active;
+  bool is_cascade_filter_active;
   biquad *biquad_client;
+  cascade *cascade_client;
 
   /**
    * Pointer to the volume controller.
@@ -83,8 +86,10 @@ public:
   void set_coeffients(const std::vector<std::vector<sample_t>> coeffients);
   void active_biquad_filter();
   void active_passall_filter();
+  void active_cascade_filter();
   void inactive_biquad_filter();
   void inactive_passall_filter();
+  void inactive_cascade_filter();
 
 
 };

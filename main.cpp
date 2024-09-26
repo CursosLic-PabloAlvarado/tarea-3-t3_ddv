@@ -133,6 +133,7 @@ int main (int argc, char *argv[])
 
     // keep running until stopped by the user
     std::cout << "Press x key to exit" << std::endl;
+    client->set_coeffients(filter_coefs);
 
     int key = -1;
     bool go_away=false;
@@ -161,10 +162,11 @@ int main (int argc, char *argv[])
           std::cout << "Repeat playing files" << std::endl;
         } break;
         case 't':{
-          client->inactive_passall_filter();
-          volume->deactivate_volume();
-          client->set_coeffients(filter_coefs);
           client->active_biquad_filter();
+          volume->deactivate_volume();
+          // client->set_coeffients(filter_coefs);
+          client->inactive_cascade_filter();
+          client->inactive_passall_filter();
         }break;
         case 'v':{
           volume->activate_volume();
@@ -180,9 +182,17 @@ int main (int argc, char *argv[])
           }
         }break;
         case 'a':{
-          client->inactive_biquad_filter();
-          volume->deactivate_volume();
           client->active_passall_filter();
+          volume->deactivate_volume();
+          client->inactive_cascade_filter();
+          client->inactive_biquad_filter();
+        }break;
+        case 'c':{
+          // client->set_coeffients(filter_coefs);
+          client->active_cascade_filter();
+          client->inactive_biquad_filter();
+          client->inactive_passall_filter();
+          volume->deactivate_volume();
         }break;
         default: {
           if (key>32) {

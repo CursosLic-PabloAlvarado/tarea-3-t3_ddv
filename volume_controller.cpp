@@ -59,8 +59,6 @@ volume_controller::~volume_controller() {
  */
 void volume_controller::activate_volume() {
     std::cout<<"volume activated"<<std::endl;
-    this->volume_db = 1;
-    this->volume_intesity = 1;
     this->is_active = true;
 }
 
@@ -70,8 +68,6 @@ void volume_controller::activate_volume() {
  */
 void volume_controller::deactivate_volume() {
     std::cout<<"Volume deactivated"<<std::endl;
-    this->volume_db = 1;
-    this->volume_intesity = 1;
     this->is_active = false;
 }
 
