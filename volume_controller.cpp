@@ -126,7 +126,7 @@ void volume_controller::db_conversion() {
         double dB_max = 70.0;
 
         // Compute the factor for dB to intensity conversion using a scaling factor
-        double factor_dB = ((this->volume_db / 20.0) * (dB_max - dB_min)) + dB_min;
+        double factor_dB = ((this->volume_db / 10.0) * (dB_max - dB_min)) + dB_min;
 
         // Convert from dB to intensity (linear scale)
         this->volume_intesity = pow(10, factor_dB / 20);

@@ -72,15 +72,18 @@ bool biquad::process(jack_nframes_t nframes,
     const sample_t *const end_ptr = in + nframes;
     const sample_t *in_ptr = in;
     sample_t *out_ptr = out;
+    sample_t y0 = 0; 
 
     for (;in_ptr != end_ptr;){
-        *out_ptr = volume_intensity * (this->b0 * (*in_ptr)  +  this->b1 * x1 + this->b2 * x2 - this->a1 * y1 - this->a2 * y2);
+        y0 =  (this->b0 * (*in_ptr)  +  this->b1 * x1 + this->b2 * x2 - this->a1 * y1 - this->a2 * y2);
       
         // update states
         this->x2 = this->x1;
         this->x1 = *in_ptr;
         this->y2 = this->y1;
-        this->y1 = *out_ptr;
+        this->y1 = y0;
+
+        *out_ptr = volume_intensity * y0;
 
         // update pointers
         ++in_ptr;
