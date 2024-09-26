@@ -83,7 +83,7 @@ bool biquad::process(jack_nframes_t nframes,
         this->y2 = this->y1;
         this->y1 = y0;
 
-+++        *out_ptr = volume_intensity * y0;
+        *out_ptr = volume_intensity * y0;
 
         // update pointers
         ++in_ptr;
