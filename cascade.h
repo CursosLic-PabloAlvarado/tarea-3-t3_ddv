@@ -51,6 +51,7 @@
  *
  * This class wraps some basic jack functionality.
  */
+template <class T>
 class cascade : public jack::client {
 
 private:
@@ -61,18 +62,17 @@ private:
   */
     volume_controller* volume_controller_prt;
 
-    biquad *biquad_client1;
-    biquad *biquad_client2;
-    biquad *biquad_client3;
+    T NumBiquads;
 
-    int num_biquads;
+    
+
     
 public:
 
     /**
      * The default constructor performs some basic connections.
      */
-    cascade(volume_controller* volume_ptr);
+    cascade();
     ~cascade();
 
     /**
@@ -82,7 +82,9 @@ public:
                         const sample_t *const in,
                         sample_t *const out) override;
 
-    void set_coeffients(const std::vector<std::vector<sample_t>> coefficients);
+    void set_coeffients(const std::vector<std::vector<sample_t>> coeffients);
+
+    void set_volume_controller(volume_controller *volume);
 };
 
 #endif

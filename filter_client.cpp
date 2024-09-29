@@ -38,11 +38,10 @@
 #include "filter_client.h"
 
 
-filter_client::filter_client(volume_controller* volume) : jack::client() {
+filter_client::filter_client(volume_controller* volume) : jack::client(){
     this->is_biquad_filter_active = false;
     this->is_passall_filter_active = true;
     this->biquad_client = new biquad(volume);
-    this->cascade_client = new cascade(volume);
     this->volume_controller_prt = volume;
 }
 
@@ -73,18 +72,18 @@ bool filter_client::process(jack_nframes_t nframes,
         in_ptr++;
         out_ptr++;
     }
+
+  // TODO: Identificar el orden del filtro
   }else if (this->is_cascade_filter_active == true){
-    cascade_client->process(nframes, in, out);
+    this->cascade_3->process(nframes, in, out);
   }
   return true;
 }
 
 void filter_client::set_coeffients(const std::vector<std::vector<sample_t>> coeffients){
-
     biquad_client->set_coeffients(coeffients[0]);
-    
-    cascade_client->set_coeffients(coeffients);
-    
+    this->cascade_3->set_volume_controller(this->volume_controller_prt);
+    this->cascade_3->set_coeffients(coeffients);
 }
 
 void filter_client::active_biquad_filter(){
