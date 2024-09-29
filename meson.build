@@ -9,6 +9,6 @@ boost_dep = dependency('boost', modules : ['program_options','system'])
 
 all_deps = [jack_dep,sndfile_dep,boost_dep]
 sources = files('main.cpp', 'jack_client.cpp','passthrough_client.cpp',
-                'sndfile_thread.cpp','waitkey.cpp', 'filter_client.cpp', 'biquad.cpp', 'volume_controller.cpp', 'cascade.cpp')
+                'sndfile_thread.cpp','waitkey.cpp', 'filter_client.cpp', 'biquad.cpp', 'volume_controller.cpp', 'cascade.cpp', 'plf_nanotimer.h', 'stats_handler.h')
 
 executable('tarea3',sources,dependencies:all_deps)

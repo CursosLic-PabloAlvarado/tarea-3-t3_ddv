@@ -36,6 +36,8 @@
  */
 
 #include "jack_client.h"
+#include <plf_nanotimer.h>
+#include <stats_handler.h>
 
 #include <cstdio>
 #include <cerrno>
@@ -98,6 +100,9 @@ namespace jack {
   jack_port_t*   client::_input_port  = nullptr;
   jack_port_t*   client::_output_port = nullptr;
 
+  plf::nanotimer timer;
+  stats_handler stats;
+
   
   /*
    * C level callback function.  
@@ -128,7 +133,9 @@ namespace jack {
       in = &(file_block_ptr->front());
     }
 
+    timer.start();
     bool ok = ptr->process(nframes,in,out);
+    stats.save_time(timer.get_elapsed_ns());
 
     if (file_block_ptr != nullptr) {
       file_block_ptr->status = sndfile_thread::Status::Garbage;
