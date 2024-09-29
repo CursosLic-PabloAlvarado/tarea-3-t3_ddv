@@ -1,0 +1,5 @@
+Fecha y hora: 2024-09-29 11:25:21
+Promedio: 7983.21 ns
+Desviación estándar: 3883.92 ns
+Varianza: 15084837.15 ns^2
+---
