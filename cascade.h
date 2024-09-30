@@ -72,6 +72,7 @@ public:
     /**
      * The default constructor performs some basic connections.
      */
+    cascade();
     cascade(volume_controller* volume_ptr);
     ~cascade();
 
@@ -82,7 +83,7 @@ public:
                         const sample_t *const in,
                         sample_t *const out) override;
 
-    void set_coeffients(const std::vector<std::vector<sample_t>> coefficients);
+    void set_coefficients(const std::vector<std::vector<sample_t>> coefficients);
 };
 
 #endif

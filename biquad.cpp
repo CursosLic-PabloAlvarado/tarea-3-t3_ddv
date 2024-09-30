@@ -39,6 +39,20 @@
 
 #include <cstring>
 
+
+biquad::biquad() : jack::client() {
+    this->b0 = 0;
+    this->b1 = 0;
+    this->b2 = 0;
+    this->a1 = 0;
+    this->a2 = 0;
+    this->x1 = 0;
+    this->x2 = 0;
+    this->y1 = 0;
+    this->y2 = 0;
+    this->volume_controller_prt = nullptr;
+}
+
 biquad::biquad(volume_controller* volume_controller) : jack::client() {
     this->b0 = 0;
     this->b1 = 0;
@@ -93,7 +107,7 @@ bool biquad::process(jack_nframes_t nframes,
   return true;
 }
 
-void biquad::set_coeffients(const std::vector<sample_t> coeffients){
+void biquad::set_coefficients(const std::vector<sample_t> coeffients){
     this->b0 = coeffients[0];
     this->b1 = coeffients[1];
     this->b2 = coeffients[2];

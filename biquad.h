@@ -70,6 +70,7 @@ public:
     /**
      * The default constructor performs some basic connections.
      */
+    biquad();
     biquad(volume_controller* volume_ptr);
     ~biquad();
 
@@ -80,7 +81,7 @@ public:
                         const sample_t *const in,
                         sample_t *const out) override;
 
-    void set_coeffients(const std::vector<sample_t> coeffients);
+    void set_coefficients(const std::vector<sample_t> coeffients);
     void set_volume_controller(volume_controller* volume_controller);
 };
 

@@ -81,9 +81,9 @@ bool filter_client::process(jack_nframes_t nframes,
 
 void filter_client::set_coeffients(const std::vector<std::vector<sample_t>> coeffients){
 
-    biquad_client->set_coeffients(coeffients[0]);
+    biquad_client->set_coefficients(coeffients[0]);
     
-    cascade_client->set_coeffients(coeffients);
+    cascade_client->set_coefficients(coeffients);
     
 }
 
