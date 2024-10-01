@@ -46,10 +46,10 @@ biquad::biquad() : jack::client() {
     this->b2 = 0;
     this->a1 = 0;
     this->a2 = 0;
-    this->x1 = 0;
-    this->x2 = 0;
-    this->y1 = 0;
-    this->y2 = 0;
+    this->x_past_1 = 0;
+    this->x_past_2 = 0;
+    this->y_past_1 = 0;
+    this->y_past_2 = 0;
     this->volume_controller_prt = nullptr;
 }
 
@@ -59,10 +59,10 @@ biquad::biquad(volume_controller* volume_controller) : jack::client() {
     this->b2 = 0;
     this->a1 = 0;
     this->a2 = 0;
-    this->x1 = 0;
-    this->x2 = 0;
-    this->y1 = 0;
-    this->y2 = 0;
+    this->x_past_1 = 0;
+    this->x_past_2 = 0;
+    this->y_past_1 = 0;
+    this->y_past_2 = 0;
     this->volume_controller_prt = volume_controller;
 }
 
@@ -91,7 +91,7 @@ bool biquad::process(jack_nframes_t nframes,
     sample_t *out_ptr = out;
     sample_t y0, y1, y2, y3, y4, y5, y6, y7 = 0; 
 
-    for (;in_ptr+7 != end_ptr;){
+    for (;in_ptr != end_ptr;){
         y0 =  (this->b0 * *(in_ptr++)  +  this->b1 * x_past_1 + this->b2 * x_past_2 - this->a1 * y_past_1 - this->a2 * y_past_2);
         y1 =  (this->b0 * *(in_ptr++)  +  this->b1 * *(in_ptr1++) + this->b2 * x_past_1 - this->a1 * y0 - this->a2 * y_past_1);
         y2 =  (this->b0 * *(in_ptr++)  +  this->b1 * *(in_ptr1++) + this->b2 * *(in_ptr2++) - this->a1 * y1 - this->a2 * y0);
@@ -100,9 +100,6 @@ bool biquad::process(jack_nframes_t nframes,
         y5 =  (this->b0 * *(in_ptr++)  +  this->b1 * *(in_ptr1++) + this->b2 * *(in_ptr2++) - this->a1 * y4 - this->a2 * y3);
         y6 =  (this->b0 * *(in_ptr++)  +  this->b1 * *(in_ptr1++) + this->b2 * *(in_ptr2++) - this->a1 * y5 - this->a2 * y4);
         y7 =  (this->b0 * *(in_ptr)  +  this->b1 * *(in_ptr1) + this->b2 * *(in_ptr2++) - this->a1 * y6 - this->a2 * y5);
-
-
-
 
         // update states
         this->x_past_2 = *in_ptr1;
