@@ -54,7 +54,7 @@ class biquad : public jack::client {
 
 private:
     double a1,a2,b0,b1,b2;
-    double x1,x2,y1,y2;
+    double x_past_1,x_past_2,y_past_1,y_past_2;
 
   /**
    * Pointer to the volume controller.

@@ -3,3 +3,13 @@ Promedio: 7983.21 ns
 Desviación estándar: 3883.92 ns
 Varianza: 15084837.15 ns^2
 ---
+Fecha y hora: 2024-09-30 19:54:16
+Promedio: 43611.30 ns
+Desviación estándar: 25313.41 ns
+Varianza: 640768713.16 ns^2
+---
+Fecha y hora: 2024-09-30 19:56:25
+Promedio: 38694.33 ns
+Desviación estándar: 23423.67 ns
+Varianza: 548668330.29 ns^2
+---

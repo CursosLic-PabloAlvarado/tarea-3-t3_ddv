@@ -133,9 +133,9 @@ namespace jack {
       in = &(file_block_ptr->front());
     }
 
-    // timer.start();
+    timer.start();
     bool ok = ptr->process(nframes,in,out);
-    // stats.save_time(timer.get_elapsed_ns());
+    stats.save_time(timer.get_elapsed_ns());
 
     if (file_block_ptr != nullptr) {
       file_block_ptr->status = sndfile_thread::Status::Garbage;
