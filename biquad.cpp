@@ -87,32 +87,33 @@ bool biquad::process(jack_nframes_t nframes,
     const sample_t *in_ptr = in;
 
     sample_t *out_ptr = out;
-    sample_t y0, y1, y2, y3, y4, y5, y6, y7 = 0; 
+    sample_t y0, y1, y2, y3, y4, y5, y6, y7;
+    sample_t w0, w1, w2, w3, w4, w5, w6, w7;
 
     while (in_ptr != end_ptr) {
-        y0 =  (this->b0 * *(in_ptr)  +  this->b1 * x_past_1 + this->b2 * x_past_2 - this->a1 * y_past_1 - this->a2 * y_past_2);
-        y1 =  (this->b0 * *(in_ptr + 1)  +  this->b1 * *(in_ptr) + this->b2 * x_past_1 - this->a1 * y0 - this->a2 * y_past_1);
-        y2 =  (this->b0 * *(in_ptr + 2)  +  this->b1 * *(in_ptr + 1) + this->b2 * *(in_ptr) - this->a1 * y1 - this->a2 * y0);
-        y3 =  (this->b0 * *(in_ptr + 3)  +  this->b1 * *(in_ptr + 2) + this->b2 * *(in_ptr + 1) - this->a1 * y2 - this->a2 * y1);
-        y4 =  (this->b0 * *(in_ptr + 4)  +  this->b1 * *(in_ptr + 3) + this->b2 * *(in_ptr + 2) - this->a1 * y3 - this->a2 * y2);
-        y5 =  (this->b0 * *(in_ptr + 5)  +  this->b1 * *(in_ptr + 4) + this->b2 * *(in_ptr + 3) - this->a1 * y4 - this->a2 * y3);
-        y6 =  (this->b0 * *(in_ptr + 6)  +  this->b1 * *(in_ptr + 5) + this->b2 * *(in_ptr + 4) - this->a1 * y5 - this->a2 * y4);
-        y7 =  (this->b0 * *(in_ptr + 7)  +  this->b1 * *(in_ptr + 6) + this->b2 * *(in_ptr + 5) - this->a1 * y6 - this->a2 * y5);
+        // Initialize state variables
+        w0 = *(in_ptr)     - this->a1 * this->x_past_1 - this->a2 * this->x_past_2;
+        w1 = *(in_ptr + 1) - this->a1 * w0 - this->a2 * this->x_past_1;
+        w2 = *(in_ptr + 2) - this->a1 * w1 - this->a2 * w0;
+        w3 = *(in_ptr + 3) - this->a1 * w2 - this->a2 * w1;
+        w4 = *(in_ptr + 4) - this->a1 * w3 - this->a2 * w2;
+        w5 = *(in_ptr + 5) - this->a1 * w4 - this->a2 * w3;
+        w6 = *(in_ptr + 6) - this->a1 * w5 - this->a2 * w4;
+        w7 = *(in_ptr + 7) - this->a1 * w6 - this->a2 * w5;
 
-        // update states
-        this->x_past_2 = *(in_ptr + 6);
-        this->x_past_1 = *(in_ptr + 7);
-        this->y_past_2 = y6;
-        this->y_past_1 = y7;
+        // Output samples
+        y0 = this->b0 * w0 + this->b1 * this->x_past_1 + this->b2 * this->x_past_2;
+        y1 = this->b0 * w1 + this->b1 * w0 + this->b2 * this->x_past_1;
+        y2 = this->b0 * w2 + this->b1 * w1 + this->b2 * w0;
+        y3 = this->b0 * w3 + this->b1 * w2 + this->b2 * w1;
+        y4 = this->b0 * w4 + this->b1 * w3 + this->b2 * w2;
+        y5 = this->b0 * w5 + this->b1 * w4 + this->b2 * w3;
+        y6 = this->b0 * w6 + this->b1 * w5 + this->b2 * w4;
+        y7 = this->b0 * w7 + this->b1 * w6 + this->b2 * w5;
 
-        *(out_ptr++) = volume_intensity * y0;
-        *(out_ptr++) = volume_intensity * y1;
-        *(out_ptr++) = volume_intensity * y2;
-        *(out_ptr++) = volume_intensity * y3;
-        *(out_ptr++) = volume_intensity * y4;
-        *(out_ptr++) = volume_intensity * y5;
-        *(out_ptr++) = volume_intensity * y6;
-        *(out_ptr++) = volume_intensity * y7;
+        // Update states
+        this->x_past_2 = w6;
+        this->x_past_1 = w7;
 
         // update pointer
         in_ptr += 8;
