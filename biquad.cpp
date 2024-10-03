@@ -115,8 +115,20 @@ bool biquad::process(jack_nframes_t nframes,
         this->x_past_2 = w6;
         this->x_past_1 = w7;
 
+
+        // Output samples
+        *(out_ptr)     = y0 * volume_intensity;
+        *(out_ptr + 1) = y1 * volume_intensity;
+        *(out_ptr + 2) = y2 * volume_intensity;
+        *(out_ptr + 3) = y3 * volume_intensity;
+        *(out_ptr + 4) = y4 * volume_intensity;
+        *(out_ptr + 5) = y5 * volume_intensity;
+        *(out_ptr + 6) = y6 * volume_intensity;
+        *(out_ptr + 7) = y7 * volume_intensity;
+
         // update pointer
         in_ptr += 8;
+        out_ptr += 8;
     }
     
   return true;
