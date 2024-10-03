@@ -1,5 +1,5 @@
 /**
- * filter_client.h
+ * cascade copy.h
  *
  * Copyright (C) 2023-2024  Pablo Alvarado
  * EL5805 Procesamiento Digital de Señales
@@ -35,65 +35,55 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _FILTER_CLIENT_H
-#define _FILTER_CLIENT_H
+#ifndef _CASCADE_COPY_H
+#define _CASCADE_COPY_H
 
 #include <iostream>
 #include <cstring>
 #include <vector>
 #include "jack_client.h"
-#include "biquad.h"
-#include "cascade.h"
-#include "cascade.tpp"
 #include "volume_controller.h"
+#include "biquad.h"
+
 
 /**
  * Jack client class
  *
  * This class wraps some basic jack functionality.
  */
-class filter_client : public jack::client {
-private:
-  bool is_biquad_filter_active;
-  bool is_passall_filter_active;
-  bool is_cascade_filter_active;
-  biquad *biquad_client;
-  cascade<2> cascade_client;
+class cascade : public jack::client {
 
+private:
   /**
    * Pointer to the volume controller.
    * This member points to an instance of the volume_controller class that 
    * manages volume operations.
   */
     volume_controller* volume_controller_prt;
-  
 
+    biquad *biquad_client1;
+    biquad *biquad_client2;
+    biquad *biquad_client3;
+
+    int num_biquads;
+    
 public:
-  // typedef jack::client::sample_t sample_t;
-  
-  /**
-   * The default constructor performs some basic connections.
-   */
-  filter_client(volume_controller* volume);
-  ~filter_client();
 
-  /**
-   * Passthrough functionality
-   */
-  virtual bool process(jack_nframes_t nframes,
-                       const sample_t *const in,
-                       sample_t *const out) override;
+    /**
+     * The default constructor performs some basic connections.
+     */
+    cascade();
+    cascade(volume_controller* volume_ptr);
+    ~cascade();
 
-  void set_coeffients(const std::vector<std::vector<sample_t>> coeffients);
-  void active_biquad_filter();
-  void active_passall_filter();
-  void active_cascade_filter();
-  void inactive_biquad_filter();
-  void inactive_passall_filter();
-  void inactive_cascade_filter();
+    /**
+     * Cascadde functionality
+     */
+    virtual bool process(jack_nframes_t nframes,
+                        const sample_t *const in,
+                        sample_t *const out) override;
 
-
+    void set_coefficients(const std::vector<std::vector<sample_t>> coefficients);
 };
-
 
 #endif

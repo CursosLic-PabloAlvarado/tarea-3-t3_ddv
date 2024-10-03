@@ -164,7 +164,6 @@ int main (int argc, char *argv[])
         case 't':{
           client->active_biquad_filter();
           volume->deactivate_volume();
-          // client->set_coeffients(filter_coefs);
           client->inactive_cascade_filter();
           client->inactive_passall_filter();
         }break;
@@ -188,7 +187,6 @@ int main (int argc, char *argv[])
           client->inactive_biquad_filter();
         }break;
         case 'c':{
-          // client->set_coeffients(filter_coefs);
           client->active_cascade_filter();
           client->inactive_biquad_filter();
           client->inactive_passall_filter();

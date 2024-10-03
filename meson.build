@@ -10,12 +10,12 @@ google_benchmark_dep = dependency('benchmark', required : true)
 
 all_deps = [jack_dep,sndfile_dep,boost_dep]
 sources = files('main.cpp', 'jack_client.cpp','passthrough_client.cpp',
-                'sndfile_thread.cpp','waitkey.cpp', 'filter_client.cpp', 'biquad.cpp', 'volume_controller.cpp', 'cascade.cpp', 'plf_nanotimer.h', 'stats_handler.h')
+                'sndfile_thread.cpp','waitkey.cpp', 'filter_client.cpp', 'biquad.cpp', 'volume_controller.cpp', 'plf_nanotimer.h', 'stats_handler.h')
 
 executable('tarea3',sources,dependencies:all_deps)
 
 benchmark_tarea3=executable('benchmark_tarea3',
-                            files('benchmark.cpp','biquad.cpp', 'cascade.cpp', 'jack_client.cpp', 'volume_controller.cpp', 'sndfile_thread.cpp'),
+                            files('benchmark.cpp','biquad.cpp', 'jack_client.cpp', 'volume_controller.cpp', 'sndfile_thread.cpp'),
                             dependencies:[boost_dep, google_benchmark_dep, jack_dep, sndfile_dep],
                             cpp_args : ['-std=c++20'],
                             build_by_default : false)

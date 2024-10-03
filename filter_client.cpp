@@ -42,7 +42,7 @@ filter_client::filter_client(volume_controller* volume) : jack::client() {
     this->is_biquad_filter_active = false;
     this->is_passall_filter_active = true;
     this->biquad_client = new biquad(volume);
-    this->cascade_client = new cascade(volume);
+    this->cascade_client.set_volume(volume);
     this->volume_controller_prt = volume;
 }
 
@@ -60,9 +60,15 @@ filter_client::~filter_client() {
 bool filter_client::process(jack_nframes_t nframes,
                                  const sample_t *const in,
                                  sample_t *const out) {
-  if (this->is_biquad_filter_active == true){
+  if (this->is_cascade_filter_active == true){
+
+    cascade_client.process(nframes, in, out);
+  } else if (this->is_biquad_filter_active == true){
+
     biquad_client->process(nframes, in, out);
+
   }else if (this->is_passall_filter_active == true ){  
+
     float volume_intensity = this->volume_controller_prt->get_volume_intesity();
     const sample_t *const end_ptr = in + nframes;
     const sample_t *in_ptr = in;
@@ -73,8 +79,6 @@ bool filter_client::process(jack_nframes_t nframes,
         in_ptr++;
         out_ptr++;
     }
-  }else if (this->is_cascade_filter_active == true){
-    cascade_client->process(nframes, in, out);
   }
   return true;
 }
@@ -83,7 +87,7 @@ void filter_client::set_coeffients(const std::vector<std::vector<sample_t>> coef
 
     biquad_client->set_coefficients(coeffients[0]);
     
-    cascade_client->set_coefficients(coeffients);
+    cascade_client.set_coefficients(coeffients);
     
 }
 
