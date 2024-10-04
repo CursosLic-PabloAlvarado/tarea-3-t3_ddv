@@ -164,8 +164,6 @@ int main (int argc, char *argv[])
         case 't':{
           client->active_biquad_filter();
           volume->deactivate_volume();
-          client->inactive_cascade_filter();
-          client->inactive_passall_filter();
         }break;
         case 'v':{
           volume->activate_volume();
@@ -183,13 +181,9 @@ int main (int argc, char *argv[])
         case 'a':{
           client->active_passall_filter();
           volume->deactivate_volume();
-          client->inactive_cascade_filter();
-          client->inactive_biquad_filter();
         }break;
         case 'c':{
           client->active_cascade_filter();
-          client->inactive_biquad_filter();
-          client->inactive_passall_filter();
           volume->deactivate_volume();
         }break;
         default: {

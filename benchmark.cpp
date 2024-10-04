@@ -74,7 +74,7 @@ BENCHMARK(BM_Biquad_Process)->RangeMultiplier(2)->Range(256, 8<<10);
 
 
 static void BM_Cascade_Process(benchmark::State& state) {
-  cascade<2> dut;
+  cascade<3> dut;
   dut.set_coefficients(std::vector< std::vector<float> >{
       {0.88489099304085195,-1.7647259369167299,0.88489099279944872,
        1,-1.9447696737414277,0.96118976527688038},

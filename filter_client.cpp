@@ -42,7 +42,8 @@ filter_client::filter_client(volume_controller* volume) : jack::client() {
     this->is_biquad_filter_active = false;
     this->is_passall_filter_active = true;
     this->biquad_client = new biquad(volume);
-    this->cascade_client.set_volume(volume);
+    this->cascade_2.set_volume(volume);
+    this->cascade_3.set_volume(volume);
     this->volume_controller_prt = volume;
 }
 
@@ -60,15 +61,16 @@ filter_client::~filter_client() {
 bool filter_client::process(jack_nframes_t nframes,
                                  const sample_t *const in,
                                  sample_t *const out) {
-  if (this->is_cascade_filter_active == true){
-
-    cascade_client.process(nframes, in, out);
-  } else if (this->is_biquad_filter_active == true){
-
+  if (this->is_cascade_filter_active){
+    if (is_cascade_2_active) {
+            cascade_2.process(nframes, in, out);
+        } else {
+            cascade_3.process(nframes, in, out);
+        }
+  } else if (this->is_biquad_filter_active){
     biquad_client->process(nframes, in, out);
 
-  }else if (this->is_passall_filter_active == true ){  
-
+  }else if (this->is_passall_filter_active){  
     float volume_intensity = this->volume_controller_prt->get_volume_intesity();
     const sample_t *const end_ptr = in + nframes;
     const sample_t *in_ptr = in;
@@ -83,40 +85,32 @@ bool filter_client::process(jack_nframes_t nframes,
   return true;
 }
 
-void filter_client::set_coeffients(const std::vector<std::vector<sample_t>> coeffients){
-
+void filter_client::set_coeffients(const std::vector<std::vector<sample_t>> coeffients) {
     biquad_client->set_coefficients(coeffients[0]);
-    
-    cascade_client.set_coefficients(coeffients);
-    
+    if (coeffients.size() == 2) {
+        cascade_2.set_coefficients(coeffients);
+        this->is_cascade_2_active = true; 
+    } else {
+        cascade_3.set_coefficients(coeffients);
+        this->is_cascade_2_active = false;
+    }
 }
 
-void filter_client::active_biquad_filter(){
-  std::cout<<"Active biquad"<<std::endl;
-  this->is_biquad_filter_active = true;
+void filter_client::active_biquad_filter() {
+    std::cout << "Active biquad" << std::endl;
+    this->is_biquad_filter_active = true;
+    this->is_cascade_filter_active = false;
+    this->is_passall_filter_active = false;
 }
-
-void filter_client::active_cascade_filter(){
-  std::cout<<"Active cascade"<<std::endl;
-  this->is_cascade_filter_active = true;
+void filter_client::active_cascade_filter() {
+    std::cout << "Active cascade" << std::endl;
+    this->is_cascade_filter_active = true;
+    this->is_biquad_filter_active = false;
+    this->is_passall_filter_active = false;
 }
-
-void filter_client::active_passall_filter(){
-  std::cout<<"Active pass all"<<std::endl;
-  this->is_passall_filter_active = true;
-}
-
-void filter_client::inactive_biquad_filter(){
-  std::cout<<"Inactive biquad all"<<std::endl;
-  this->is_biquad_filter_active = false;
-}
-
-void filter_client::inactive_passall_filter(){
-  std::cout<<"Inactive pass all"<<std::endl;
-  this->is_passall_filter_active = false;
-}
-
-void filter_client::inactive_cascade_filter(){
-  std::cout<<"Inactive cascade"<<std::endl;
-  this->is_cascade_filter_active = false;
+void filter_client::active_passall_filter() {
+    std::cout << "Active pass all" << std::endl;
+    this->is_passall_filter_active = true;
+    this->is_biquad_filter_active = false;
+    this->is_cascade_filter_active = false;
 }

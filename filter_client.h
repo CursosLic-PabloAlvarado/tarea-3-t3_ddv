@@ -57,8 +57,10 @@ private:
   bool is_biquad_filter_active;
   bool is_passall_filter_active;
   bool is_cascade_filter_active;
+  bool is_cascade_2_active;
   biquad *biquad_client;
-  cascade<2> cascade_client;
+  cascade<2> cascade_2;
+  cascade<3> cascade_3;
 
   /**
    * Pointer to the volume controller.
@@ -88,9 +90,6 @@ public:
   void active_biquad_filter();
   void active_passall_filter();
   void active_cascade_filter();
-  void inactive_biquad_filter();
-  void inactive_passall_filter();
-  void inactive_cascade_filter();
 
 
 };

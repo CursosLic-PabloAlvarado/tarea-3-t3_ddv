@@ -16,13 +16,13 @@ bool cascade<N>::process(jack_nframes_t nframes,
     sample_t* temp_out = out;                       // Output buffer
 
     // Process the first biquad filter
-    this->biquad_filters[0].process(nframes, temp_in, (N == 1) ? temp_out : temp_in);
+    this->biquad_filters[0].process(nframes, temp_in, temp_in);
 
     // Process remaining biquads
     if constexpr (N == 2) {
         // Unrolled for 2 filters
         this->biquad_filters[1].process(nframes, temp_in, temp_out);
-    } else {
+    } else if constexpr(N == 3) {
         // Unrolled for 3 filters
         this->biquad_filters[1].process(nframes, temp_in, temp_in); // Process first in-place
         this->biquad_filters[2].process(nframes, temp_in, temp_out); // Process last to output
@@ -38,12 +38,21 @@ template <unsigned int N>
 void cascade<N>::set_coefficients(const std::vector<std::vector<sample_t>>& coefficients) {
     if (coefficients.size() != N) {
         std::cerr << "Error: Number of coefficient sets must match the number of biquads." << std::endl;
-        return;
     }
-
-    for (unsigned int i = 0; i < N; ++i) {
-        this->biquad_filters[i].set_coefficients(coefficients[i]);
-        this->biquad_filters[i].set_volume_controller(this->volume_controller_prt);
+    if constexpr (N == 2) {
+        this->biquad_filters[0].set_coefficients(coefficients[0]);
+        this->biquad_filters[0].set_volume_controller(this->volume_controller_prt);
+        this->biquad_filters[1].set_coefficients(coefficients[1]);
+        this->biquad_filters[1].set_volume_controller(this->volume_controller_prt);
+    }
+    else if constexpr (N == 3) {
+        std::cout << "set coeffs for 3rd order" << std::endl;
+        this->biquad_filters[0].set_coefficients(coefficients[0]);
+        this->biquad_filters[0].set_volume_controller(this->volume_controller_prt);
+        this->biquad_filters[1].set_coefficients(coefficients[1]);
+        this->biquad_filters[1].set_volume_controller(this->volume_controller_prt);
+        this->biquad_filters[2].set_coefficients(coefficients[2]);
+        this->biquad_filters[2].set_volume_controller(this->volume_controller_prt);
     }
 }
 
