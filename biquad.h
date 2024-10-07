@@ -77,7 +77,7 @@ public:
     /**
      * Passthrough functionality
      */
-    virtual bool process(jack_nframes_t nframes,
+    inline virtual bool process(jack_nframes_t nframes,
                         const sample_t *const in,
                         sample_t *const out) override;
 

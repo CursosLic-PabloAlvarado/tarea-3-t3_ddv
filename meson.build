@@ -12,6 +12,11 @@ all_deps = [jack_dep,sndfile_dep,boost_dep]
 sources = files('main.cpp', 'jack_client.cpp','passthrough_client.cpp',
                 'sndfile_thread.cpp','waitkey.cpp', 'filter_client.cpp', 'biquad.cpp', 'volume_controller.cpp', 'plf_nanotimer.h', 'stats_handler.h')
 
+
+# Add optimization and AVX compiler flags
+add_project_arguments('-mavx', language: 'cpp')
+
+
 executable('tarea3',sources,dependencies:all_deps)
 
 benchmark_tarea3=executable('benchmark_tarea3',
