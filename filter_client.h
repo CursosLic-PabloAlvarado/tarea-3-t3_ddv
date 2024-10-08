@@ -74,7 +74,9 @@ public:
   // typedef jack::client::sample_t sample_t;
   
   /**
-   * The default constructor performs some basic connections.
+   * The default constructor in charge of setting initial state,
+   * creating the instance for the required biquad class and
+   * set volume controller pointers for each level of the biquad cascade
    */
   filter_client(volume_controller* volume);
   ~filter_client();
@@ -86,9 +88,22 @@ public:
                        const sample_t *const in,
                        sample_t *const out) override;
 
+  /* 
+  * Method that sets the coefficient for each biquad stage from the
+  * matrix obtained from the designed filters.
+  */
   void set_coeffients(const std::vector<std::vector<sample_t>> coeffients);
+  /* 
+  * Method that sets the biquad filter on.
+  */
   void active_biquad_filter();
+  /* 
+  * Method that sets the pasall filter on.
+  */
   void active_passall_filter();
+  /* 
+  * Method that sets the cascade filter on.
+  */
   void active_cascade_filter();
 
 

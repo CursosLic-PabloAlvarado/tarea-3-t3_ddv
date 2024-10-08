@@ -42,6 +42,9 @@ public:
    * Set filter coefficients for all biquad filters in the cascade.
    */
   void set_coefficients(const std::vector<std::vector<sample_t>>& coefficients);
+  /**
+   * Set volume controller for the desired intensity on the output
+   */
   void set_volume(volume_controller* volume_ptr);
 };
 #endif

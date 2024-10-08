@@ -81,7 +81,13 @@ public:
                         const sample_t *const in,
                         sample_t *const out) override;
 
+    /**
+    * Method used to set coefficients from the obtained filter matrix
+    */
     void set_coefficients(const std::vector<sample_t> coeffients);
+    /**
+    * Method used to set the value for the desired volume on the output 
+    */
     void set_volume_controller(volume_controller* volume_controller);
 };
 

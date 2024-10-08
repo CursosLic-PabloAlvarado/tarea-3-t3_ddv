@@ -42,169 +42,170 @@
  */
 
 #include <cstdlib>
-
 #include <iostream>
 #include <stdexcept>
 #include <filesystem>
 #include <vector>
-
 #include <csignal>
-
 #include <boost/program_options.hpp>
-
 #include "waitkey.h"
-
 #include "parse_filter.h"
 #include "filter_client.h"
 #include "volume_controller.h"
 
-
-namespace po=boost::program_options;
+// Alias for easier usage of boost program options
+namespace po = boost::program_options;
 
 /**
  * Handler for the SIGINT (interrupt signal)
+ * Catches the Ctrl-C signal and exits the program gracefully
  */
 void signal_handler(int signal) {
   if (signal == SIGINT) {
     std::cout << "Ctrl-C caught, cleaning up and exiting" << std::endl;
 
-    // Let RAII do the clean-up
+    // Let RAII handle cleanup, then exit
     exit(EXIT_SUCCESS);
   }
 }
 
 int main (int argc, char *argv[])
 {
-  std::signal(SIGINT,signal_handler);
+  // Set up signal handler for Ctrl-C
+  std::signal(SIGINT, signal_handler);
 
-  
   try {
+    // Create static objects for volume control and filter client
     static volume_controller* volume = new volume_controller();
-    static filter_client *client = new filter_client(volume);
-    
+    static filter_client* client = new filter_client(volume);
 
+    // Define sample type (from jack client)
     typedef jack::client::sample_t sample_t;
-    
-    // Filter coefficients
+
+    // Variables to hold filter coefficients and the file path
     std::string filter_file;
-    std::vector< std::vector< sample_t > > filter_coefs;
-    
-    // Parse options from the command line
+    std::vector<std::vector<sample_t>> filter_coefs;
+
+    // Define and parse command line options
     po::options_description desc("Allowed options");
 
+    // Add options for help, audio files, and filter coefficients
     desc.add_options()
-      ("help,h","show usage information")
-      ("files,f",
-       po::value<std::vector<std::filesystem::path> >()->multitoken(),
-       "List of audio files to be played")
-      ("coeffs,c",
-       po::value<std::string>(&filter_file),
-       "File with filter coefficients (from GNU/Octave)");
+      ("help,h", "show usage information")
+      ("files,f", po::value<std::vector<std::filesystem::path>>()->multitoken(), "List of audio files to be played")
+      ("coeffs,c", po::value<std::string>(&filter_file), "File with filter coefficients (from GNU/Octave)");
 
     po::variables_map vm;
-    po::store(po::parse_command_line(argc,argv,desc),vm);
+    // Parse command line arguments and store in variable map
+    po::store(po::parse_command_line(argc, argv, desc), vm);
     po::notify(vm);
-    
+
+    // If help option is provided, show usage information and exit
     if (vm.count("help")) {
       std::cout << desc << std::endl;
       return EXIT_SUCCESS;
     }
 
+    // If audio files are provided, add them to the client
     if (vm.count("files")) {
-      const std::vector< std::filesystem::path >&
-        audio_files = vm["files"].as< std::vector<std::filesystem::path> >();
-    
+      const std::vector<std::filesystem::path>& audio_files = vm["files"].as<std::vector<std::filesystem::path>>();
       for (const auto& f : audio_files) {
-        bool ok =client->add_file(f);
-        std::cout << "Adding file '" << f.c_str() << "' "
-                  << (ok ? "succedded" : "failed") << std::endl;
+        bool ok = client->add_file(f);
+        std::cout << "Adding file '" << f.c_str() << "' " << (ok ? "succeeded" : "failed") << std::endl;
       }
     }
 
+    // If filter coefficients file is provided, parse and store the coefficients
     if (vm.count("coeffs")) {
       filter_coefs = parse_filter<sample_t>(filter_file);
-      std::cout << filter_coefs.size() << " 2nd order filter read from "
-                << filter_file<<std::endl;
+      std::cout << filter_coefs.size() << " 2nd order filter read from " << filter_file << std::endl;
     }
-    
+
+    // Initialize the JACK client, throw an error if it fails
     if (client->init() != jack::client_state::Running) {
       throw std::runtime_error("Could not initialize the JACK client");
     }
 
-    // keep running until stopped by the user
+    // Inform user that they can press 'x' to exit
     std::cout << "Press x key to exit" << std::endl;
-    client->set_coeffients(filter_coefs);
+    client->set_coeffients(filter_coefs);  // Set the filter coefficients
 
     int key = -1;
-    bool go_away=false;
+    bool go_away = false;
+
+    // Main loop to handle user input and control program execution
     while (!go_away) {
-      key = waitkey(100);
-      if (key>0) {
-        switch(key) {
+      key = waitkey(100);  // Wait for key press (with 100ms timeout)
+      if (key > 0) {
+        switch (key) {
         case 'x': {
-          go_away=true;
+          go_away = true;  // Exit the loop when 'x' is pressed
           std::cout << "Finishing..." << std::endl;
         } break;
         case 'r': {
-
+          // Re-add audio files if 'r' is pressed
           if (vm.count("files")) {
-            const std::vector< std::filesystem::path >&
-              audio_files =
-              vm["files"].as< std::vector<std::filesystem::path> >();
-            
+            const std::vector<std::filesystem::path>& audio_files = vm["files"].as<std::vector<std::filesystem::path>>();
             for (const auto& f : audio_files) {
-              bool ok =client->add_file(f);
-              std::cout << "  Re-adding file '" << f.c_str() << "' "
-                        << (ok ? "succedded" : "failed") << std::endl;
+              bool ok = client->add_file(f);
+              std::cout << "  Re-adding file '" << f.c_str() << "' " << (ok ? "succeeded" : "failed") << std::endl;
             }
           }
-          
           std::cout << "Repeat playing files" << std::endl;
         } break;
-        case 't':{
+        case 't': {
+          // Activate the biquad filter and deactivate the volume control
           client->active_biquad_filter();
           volume->deactivate_volume();
-        }break;
-        case 'v':{
+        } break;
+        case 'v': {
+          // Activate volume control
           volume->activate_volume();
-        }break;
-        case '+':{
-          if (volume->is_volume_active()){
+        } break;
+        case '+': {
+          // Increase volume if volume control is active
+          if (volume->is_volume_active()) {
             volume->increase_volume();
           }
-        }break;
-        case '-':{
-          if (volume->is_volume_active()){
+        } break;
+        case '-': {
+          // Decrease volume if volume control is active
+          if (volume->is_volume_active()) {
             volume->decrease_volume();
           }
-        }break;
-        case 'a':{
+        } break;
+        case 'a': {
+          // Activate pass-all filter and deactivate volume control
           client->active_passall_filter();
           volume->deactivate_volume();
-        }break;
-        case 'c':{
+        } break;
+        case 'c': {
+          // Activate cascade filter and deactivate volume control
           client->active_cascade_filter();
           volume->deactivate_volume();
-        }break;
+        } break;
         default: {
-          if (key>32) {
+          // Print the key that was pressed (for non-special keys)
+          if (key > 32) {
             std::cout << "Key " << char(key) << " pressed" << std::endl;
           } else {
             std::cout << "Key " << key << " pressed" << std::endl;
           }
-          key=-1;
+          key = -1;
         }
         } // switch key
-      } // if (key>0)
+      } // if (key > 0)
     } // end while
 
+    // Stop the JACK client before exiting
     client->stop();
   }
   catch (std::exception& exc) {
+    // Catch and report any exceptions
     std::cout << argv[0] << ": Error: " << exc.what() << std::endl;
     exit(EXIT_FAILURE);
   }
-  
 
+  // Exit program successfully
   exit(EXIT_SUCCESS);
 }

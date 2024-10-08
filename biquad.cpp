@@ -82,14 +82,17 @@ bool biquad::process(jack_nframes_t nframes,
                                  const sample_t *const in,
                                  sample_t *const out) {
     
+    // Setting pointers for sample managment
     float volume_intensity = this->volume_controller_prt == nullptr ? 1 : this->volume_controller_prt->get_volume_intesity();
     const sample_t *const end_ptr = in + nframes;
     const sample_t *in_ptr = in;
-
     sample_t *out_ptr = out;
+
+    // Declaring variables for the direct form II necessary constants
     sample_t y0, y1, y2, y3, y4, y5, y6, y7;
     sample_t w0, w1, w2, w3, w4, w5, w6, w7;
 
+    // Performing the processing through loop unrolling
     while (in_ptr != end_ptr) {
         // Initialize state variables
         w0 = *(in_ptr)     - this->a1 * this->x_past_1 - this->a2 * this->x_past_2;
@@ -134,6 +137,9 @@ bool biquad::process(jack_nframes_t nframes,
   return true;
 }
 
+/**
+* Method used to set coefficients from the obtained filter matrix
+*/
 void biquad::set_coefficients(const std::vector<sample_t> coeffients){
     this->b0 = coeffients[0];
     this->b1 = coeffients[1];
@@ -142,6 +148,9 @@ void biquad::set_coefficients(const std::vector<sample_t> coeffients){
     this->a2 = coeffients[5];
 }
 
+/**
+* Method used to set the value for the desired volume on the output 
+*/
 void biquad::set_volume_controller(volume_controller* volume_controller){
     this->volume_controller_prt = volume_controller;
 }
