@@ -2,8 +2,8 @@ pkg load signal
 % Global parameters for filter
 fc_lowpass = 440;  % cut frequency in Hz
 fc_highpass = 600; % cut frequency in Hz
-fc_low = 220;  % cut frequency in Hz
-fc_high = 1000; % cut frequency in Hz
+fc_low = 220;  % band low frequency in Hz
+fc_high = 1000; % band high frequency in Hz
 fs = 48000; % sample frequency in Hz
 order = 3; % Order of the filter
 rp = 1;     % Ripple in the passband 

@@ -46,7 +46,6 @@ void cascade<N>::set_coefficients(const std::vector<std::vector<sample_t>>& coef
         this->biquad_filters[1].set_volume_controller(this->volume_controller_prt);
     }
     else if constexpr (N == 3) {
-        std::cout << "set coeffs for 3rd order" << std::endl;
         this->biquad_filters[0].set_coefficients(coefficients[0]);
         this->biquad_filters[0].set_volume_controller(this->volume_controller_prt);
         this->biquad_filters[1].set_coefficients(coefficients[1]);
