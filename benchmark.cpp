@@ -58,8 +58,8 @@ static void BM_Biquad_Process(benchmark::State& state) {
     });
   int size = state.range(0);
 
-  float input[size];
-  float output[size];
+  alignas(32) float input[size];
+  alignas(32) float output[size];
 
   for (auto _ : state) {
     dut.process(size, input, output);
@@ -85,8 +85,8 @@ static void BM_Cascade_Process(benchmark::State& state) {
     });
   int size = state.range(0);
 
-  float input[size];
-  float output[size];
+  alignas(32) float input[size];
+  alignas(32) float output[size];
 
   for (auto _ : state) {
     dut.process(size, input, output);
