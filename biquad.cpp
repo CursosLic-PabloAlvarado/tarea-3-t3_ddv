@@ -38,7 +38,7 @@
 #include "biquad.h"
 
 #include <cstring>
-
+#include <immintrin.h> 
 
 biquad::biquad() : jack::client() {
     this->b0 = 0;
@@ -79,8 +79,8 @@ biquad::~biquad() {
    * the user (e.g. using Ctrl-C on a unix-ish operating system)
    */
 bool biquad::process(jack_nframes_t nframes,
-                                 const sample_t *const in,
-                                 sample_t *const out) {
+                     const sample_t *const in,
+                     sample_t *const out) {
     
     // Setting pointers for sample managment
     float volume_intensity = this->volume_controller_prt == nullptr ? 1 : this->volume_controller_prt->get_volume_intesity();
@@ -88,53 +88,62 @@ bool biquad::process(jack_nframes_t nframes,
     const sample_t *in_ptr = in;
     sample_t *out_ptr = out;
 
+    // Declaring variables for the direct form II coefficients
+    __m256 a1_vec = _mm256_set1_ps(this->a1);
+    __m256 a2_vec = _mm256_set1_ps(this->a2);
+    __m256 b0_vec = _mm256_set1_ps(this->b0);
+    __m256 b1_vec = _mm256_set1_ps(this->b1);
+    __m256 b2_vec = _mm256_set1_ps(this->b2);
+    __m256 volume_vec = _mm256_set1_ps(volume_intensity);
+    
     // Declaring variables for the direct form II necessary constants
-    sample_t y0, y1, y2, y3, y4, y5, y6, y7;
-    sample_t w0, w1, w2, w3, w4, w5, w6, w7;
+    __m256 x_past_1_vec = _mm256_set1_ps(this->x_past_1);
+    __m256 x_past_2_vec = _mm256_set1_ps(this->x_past_2);
 
     // Performing the processing through loop unrolling
     while (in_ptr != end_ptr) {
+        __m256 in_vec = _mm256_loadu_ps(in_ptr);
+
         // Initialize state variables
-        w0 = *(in_ptr)     - this->a1 * this->x_past_1 - this->a2 * this->x_past_2;
-        w1 = *(in_ptr + 1) - this->a1 * w0 - this->a2 * this->x_past_1;
-        w2 = *(in_ptr + 2) - this->a1 * w1 - this->a2 * w0;
-        w3 = *(in_ptr + 3) - this->a1 * w2 - this->a2 * w1;
-        w4 = *(in_ptr + 4) - this->a1 * w3 - this->a2 * w2;
-        w5 = *(in_ptr + 5) - this->a1 * w4 - this->a2 * w3;
-        w6 = *(in_ptr + 6) - this->a1 * w5 - this->a2 * w4;
-        w7 = *(in_ptr + 7) - this->a1 * w6 - this->a2 * w5;
+        __m256 w0_vec = _mm256_sub_ps(in_vec, _mm256_add_ps(_mm256_mul_ps(a1_vec, x_past_1_vec), _mm256_mul_ps(a2_vec, x_past_2_vec)));
+        __m256 w1_vec = _mm256_sub_ps(_mm256_loadu_ps(in_ptr + 1), _mm256_add_ps(_mm256_mul_ps(a1_vec, w0_vec), _mm256_mul_ps(a2_vec, x_past_1_vec)));
+        __m256 w2_vec = _mm256_sub_ps(_mm256_loadu_ps(in_ptr + 2), _mm256_add_ps(_mm256_mul_ps(a1_vec, w1_vec), _mm256_mul_ps(a2_vec, w0_vec)));
+        __m256 w3_vec = _mm256_sub_ps(_mm256_loadu_ps(in_ptr + 3), _mm256_add_ps(_mm256_mul_ps(a1_vec, w2_vec), _mm256_mul_ps(a2_vec, w1_vec)));
+        __m256 w4_vec = _mm256_sub_ps(_mm256_loadu_ps(in_ptr + 4), _mm256_add_ps(_mm256_mul_ps(a1_vec, w3_vec), _mm256_mul_ps(a2_vec, w2_vec)));
+        __m256 w5_vec = _mm256_sub_ps(_mm256_loadu_ps(in_ptr + 5), _mm256_add_ps(_mm256_mul_ps(a1_vec, w4_vec), _mm256_mul_ps(a2_vec, w3_vec)));
+        __m256 w6_vec = _mm256_sub_ps(_mm256_loadu_ps(in_ptr + 6), _mm256_add_ps(_mm256_mul_ps(a1_vec, w5_vec), _mm256_mul_ps(a2_vec, w4_vec)));
+        __m256 w7_vec = _mm256_sub_ps(_mm256_loadu_ps(in_ptr + 7), _mm256_add_ps(_mm256_mul_ps(a1_vec, w6_vec), _mm256_mul_ps(a2_vec, w5_vec)));
 
         // Output samples
-        y0 = this->b0 * w0 + this->b1 * this->x_past_1 + this->b2 * this->x_past_2;
-        y1 = this->b0 * w1 + this->b1 * w0 + this->b2 * this->x_past_1;
-        y2 = this->b0 * w2 + this->b1 * w1 + this->b2 * w0;
-        y3 = this->b0 * w3 + this->b1 * w2 + this->b2 * w1;
-        y4 = this->b0 * w4 + this->b1 * w3 + this->b2 * w2;
-        y5 = this->b0 * w5 + this->b1 * w4 + this->b2 * w3;
-        y6 = this->b0 * w6 + this->b1 * w5 + this->b2 * w4;
-        y7 = this->b0 * w7 + this->b1 * w6 + this->b2 * w5;
+        __m256 y0_vec = _mm256_add_ps(_mm256_add_ps(_mm256_mul_ps(b0_vec, w0_vec), _mm256_mul_ps(b1_vec, x_past_1_vec)), _mm256_mul_ps(b2_vec, x_past_2_vec));
+        __m256 y1_vec = _mm256_add_ps(_mm256_add_ps(_mm256_mul_ps(b0_vec, w1_vec), _mm256_mul_ps(b1_vec, w0_vec)), _mm256_mul_ps(b2_vec, x_past_1_vec));
+        __m256 y2_vec = _mm256_add_ps(_mm256_add_ps(_mm256_mul_ps(b0_vec, w2_vec), _mm256_mul_ps(b1_vec, w1_vec)), _mm256_mul_ps(b2_vec, w0_vec));
+        __m256 y3_vec = _mm256_add_ps(_mm256_add_ps(_mm256_mul_ps(b0_vec, w3_vec), _mm256_mul_ps(b1_vec, w2_vec)), _mm256_mul_ps(b2_vec, w1_vec));
+        __m256 y4_vec = _mm256_add_ps(_mm256_add_ps(_mm256_mul_ps(b0_vec, w4_vec), _mm256_mul_ps(b1_vec, w3_vec)), _mm256_mul_ps(b2_vec, w2_vec));
+        __m256 y5_vec = _mm256_add_ps(_mm256_add_ps(_mm256_mul_ps(b0_vec, w5_vec), _mm256_mul_ps(b1_vec, w4_vec)), _mm256_mul_ps(b2_vec, w3_vec));
+        __m256 y6_vec = _mm256_add_ps(_mm256_add_ps(_mm256_mul_ps(b0_vec, w6_vec), _mm256_mul_ps(b1_vec, w5_vec)), _mm256_mul_ps(b2_vec, w4_vec));
+        __m256 y7_vec = _mm256_add_ps(_mm256_add_ps(_mm256_mul_ps(b0_vec, w7_vec), _mm256_mul_ps(b1_vec, w6_vec)), _mm256_mul_ps(b2_vec, w5_vec));
 
         // Update states
-        this->x_past_2 = w6;
-        this->x_past_1 = w7;
-
+        x_past_2_vec = w6_vec;
+        x_past_1_vec = w7_vec;
 
         // Output samples
-        *(out_ptr)     = y0 * volume_intensity;
-        *(out_ptr + 1) = y1 * volume_intensity;
-        *(out_ptr + 2) = y2 * volume_intensity;
-        *(out_ptr + 3) = y3 * volume_intensity;
-        *(out_ptr + 4) = y4 * volume_intensity;
-        *(out_ptr + 5) = y5 * volume_intensity;
-        *(out_ptr + 6) = y6 * volume_intensity;
-        *(out_ptr + 7) = y7 * volume_intensity;
+        _mm256_storeu_ps(out_ptr, _mm256_mul_ps(y0_vec, volume_vec));
+        _mm256_storeu_ps(out_ptr + 1, _mm256_mul_ps(y1_vec, volume_vec));
+        _mm256_storeu_ps(out_ptr + 2, _mm256_mul_ps(y2_vec, volume_vec));
+        _mm256_storeu_ps(out_ptr + 3, _mm256_mul_ps(y3_vec, volume_vec));
+        _mm256_storeu_ps(out_ptr + 4, _mm256_mul_ps(y4_vec, volume_vec));
+        _mm256_storeu_ps(out_ptr + 5, _mm256_mul_ps(y5_vec, volume_vec));
+        _mm256_storeu_ps(out_ptr + 6, _mm256_mul_ps(y6_vec, volume_vec));
+        _mm256_storeu_ps(out_ptr + 7, _mm256_mul_ps(y7_vec, volume_vec));
 
-        // update pointer
+        // Update pointers
         in_ptr += 8;
         out_ptr += 8;
     }
     
-  return true;
+    return true;
 }
 
 /**
